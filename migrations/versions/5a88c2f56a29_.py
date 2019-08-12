@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: d04fd31e6ba7
+Revision ID: 5a88c2f56a29
 Revises: 
-Create Date: 2019-06-04 14:25:20.052900
+Create Date: 2019-08-12 14:35:52.787117
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd04fd31e6ba7'
+revision = '5a88c2f56a29'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -30,6 +30,7 @@ def upgrade():
     sa.Column('server_mqtt_name_process', sa.String(), nullable=True),
     sa.Column('api_name_process', sa.String(), nullable=True),
     sa.Column('api_port', sa.Integer(), nullable=True),
+    sa.Column('sn_autostartMQTT', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('mac_raspberry', 'id_equipo')
     )
     op.create_table('registro',
@@ -48,23 +49,17 @@ def upgrade():
     sa.Column('canal7', sa.Float(), nullable=True),
     sa.PrimaryKeyConstraint('id_registro')
     )
-    op.create_table('serverMQTT',
-    sa.Column('id_server', sa.Integer(), nullable=False),
-    sa.Column('host_id', sa.String(), nullable=True),
-    sa.Column('port_id', sa.Integer(), nullable=True),
-    sa.Column('de_comentario', sa.Boolean(), nullable=True),
-    sa.PrimaryKeyConstraint('id_server')
-    )
     op.create_table('server_secundario',
     sa.Column('id_server', sa.Integer(), nullable=False),
     sa.Column('nombre_equipo', sa.String(), nullable=True),
-    sa.Column('address', sa.String(), nullable=True),
+    sa.Column('host', sa.String(), nullable=True),
+    sa.Column('port', sa.Integer(), nullable=True),
     sa.Column('estado', sa.Boolean(), nullable=True),
     sa.Column('method', sa.String(), nullable=True),
+    sa.Column('ti_equipo', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id_server')
     )
     op.create_table('sensor',
-    sa.Column('id_sensor', sa.Integer(), nullable=False),
     sa.Column('guid_sensor', sa.String(), nullable=False),
     sa.Column('id_modulo', sa.Integer(), nullable=False),
     sa.Column('codigo_sensor', sa.String(), nullable=False),
@@ -83,9 +78,11 @@ def upgrade():
     sa.Column('ti_conexion', sa.Integer(), nullable=True),
     sa.Column('topico_suscripto', sa.String(), nullable=True),
     sa.Column('ti_sensor', sa.String(), nullable=True),
-    sa.Column('server_mqtt_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['server_mqtt_id'], ['serverMQTT.id_server'], ),
-    sa.PrimaryKeyConstraint('id_sensor', 'id_modulo')
+    sa.Column('server_id', sa.Integer(), nullable=True),
+    sa.Column('sn_tiempo_x_hs', sa.Boolean(), nullable=True),
+    sa.Column('horarios', sa.String(), nullable=True),
+    sa.ForeignKeyConstraint(['server_id'], ['server_secundario.id_server'], ),
+    sa.PrimaryKeyConstraint('guid_sensor', 'id_modulo')
     )
     op.create_table('registro_interno',
     sa.Column('id_registro', sa.Integer(), nullable=False),
@@ -112,7 +109,6 @@ def downgrade():
     op.drop_table('registro_interno')
     op.drop_table('sensor')
     op.drop_table('server_secundario')
-    op.drop_table('serverMQTT')
     op.drop_table('registro')
     op.drop_table('equipo')
     # ### end Alembic commands ###
